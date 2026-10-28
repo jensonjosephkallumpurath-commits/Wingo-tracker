@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WinGo Tracker</title>
+<style>
+body{font-family:Arial;background:#101522;color:white;padding:18px}
+h1{color:#55e6a5}
+.card{background:#202a3b;padding:16px;border-radius:12px;margin:12px 0}
+input,select,button{padding:12px;margin:5px 0;border-radius:7px;border:0}
+button{background:#55e6a5;color:#101522;font-weight:bold}
+li{padding:7px}
+</style>
+</head>
+<body>
+<h1>WinGo Tracker</h1>
+<div class="card">
+<h3>Add Result</h3>
+<input id="period" placeholder="Period number">
+<select id="number">
+<option value="">Choose number</option>
+<script>
+for(let i=0;i<10;i++)document.write(`<option>${i}</option>`);
+</script>
+</select>
+<button onclick="addResult()">Add Result</button>
+</div>
+<div class="card">
+<h3>Statistics</h3>
+<p id="stats">No results yet</p>
+</div>
+<div class="card">
+<h3>History</h3>
+<button onclick="clearHistory()">Clear History</button>
+<ol id="history"></ol>
+</div>
+<script>
+let data=JSON.parse(localStorage.getItem("wingoHistory")||"[]");
+function colour(n){
+ n=Number(n);
+ if([1,3,7,9].includes(n))return "Green";
+ if([2,4,6,8].includes(n))return "Red";
+ return "Violet";
+}
+function size(n){return Number(n)>=5?"Big":"Small";}
+function render(){
+ history.innerHTML="";
+ data.forEach(r=>{
+  let li=document.createElement("li");
+  li.textContent=`${r.period}: ${r.number} | ${colour(r.number)} | ${size(r.number)}`;
+  history.appendChild(li);
+ });
+ let counts=Array(10).fill(0);
+ data.forEach(r=>counts[Number(r.number)]++);
+ stats.textContent="Number counts (0–9): "+counts.join(", ");
+}
+function addResult(){
+ let p=document.getElementById("period").value.trim();
+ let n=document.getElementById("number").value;
+ if(!p||n===""){alert("Enter period and number");return;}
+ data.unshift({period:p,number:Number(n)});
+ data=data.slice(0,200);
+ localStorage.setItem("wingoHistory",JSON.stringify(data));
+ document.getElementById("period").value="";
+ document.getElementById("number").value="";
+ render();
+}
+function clearHistory(){
+ if(confirm("Clear all saved history?")){
+  data=[];localStorage.removeItem("wingoHistory");render();
+ }
+}
+render();
+</script>
+</body>
+  </html>
